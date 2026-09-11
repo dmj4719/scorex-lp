@@ -100,25 +100,45 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
-  // ===== 画像拡大（PC:カーソルを合わせるとプレビュー／スマホ:タップで全画面） =====
+  // ===== 画像拡大（PC:カーソルを合わせるとプレビュー／SP:タップで横向き全画面） =====
   var zoomables = document.querySelectorAll('.zoomable');
   if (zoomables.length) {
-    // 全画面ライトボックス
     var ov = document.createElement('div');
     ov.id = 'zoomOverlay';
     ov.setAttribute('role', 'dialog');
     ov.setAttribute('aria-modal', 'true');
-    ov.innerHTML = '<button id="zoomClose" type="button" aria-label="閉じる">×</button>' +
-                   '<img alt=""><p id="zoomCaption"></p>';
+    ov.innerHTML = '<div id="zoomStage">' +
+                     '<img alt="">' +
+                     '<button id="zoomClose" type="button" aria-label="閉じる">×</button>' +
+                     '<p id="zoomCaption"></p>' +
+                   '</div>';
     document.body.appendChild(ov);
     var ovImg = ov.querySelector('img');
     var ovCap = ov.querySelector('#zoomCaption');
     var prevOverflow = '';
+    var currentAlt = '';
+
+    // SPの縦持ちのときだけステージを90度回転させて「横画面」で見せる
+    // （iOS Safari は screen.orientation.lock 非対応のため、CSS回転で実現）
+    var mqSP = window.matchMedia('(max-width:767px), (pointer:coarse)');
+    var mqPortrait = window.matchMedia('(orientation:portrait)');
+    var applyRotation = function () {
+      var rotate = mqSP.matches && mqPortrait.matches;
+      ov.classList.toggle('is-rotated', rotate);
+      ovCap.textContent = rotate
+        ? (currentAlt ? currentAlt + '／端末を横にするとそのまま見られます' : '端末を横にするとそのまま見られます')
+        : currentAlt;
+    };
+    var onOrientationChange = function () { if (ov.classList.contains('is-open')) applyRotation(); };
+    if (mqPortrait.addEventListener) mqPortrait.addEventListener('change', onOrientationChange);
+    else if (mqPortrait.addListener) mqPortrait.addListener(onOrientationChange);
+    window.addEventListener('resize', onOrientationChange);
 
     var openZoom = function (img) {
       ovImg.src = img.currentSrc || img.src;
       ovImg.alt = img.alt || '';
-      ovCap.textContent = img.alt || '';
+      currentAlt = img.alt || '';
+      applyRotation();
       ov.classList.add('is-open');
       prevOverflow = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
@@ -127,7 +147,11 @@ document.addEventListener('DOMContentLoaded', function () {
     var closeZoom = function () {
       ov.classList.remove('is-visible');
       document.body.style.overflow = prevOverflow;
-      setTimeout(function () { ov.classList.remove('is-open'); ovImg.removeAttribute('src'); }, 200);
+      setTimeout(function () {
+        ov.classList.remove('is-open');
+        ov.classList.remove('is-rotated');
+        ovImg.removeAttribute('src');
+      }, 200);
     };
     ov.addEventListener('click', closeZoom);
     document.addEventListener('keydown', function (e) {
@@ -135,7 +159,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // PCのホバープレビュー（マウス操作の端末のみ）
-    var fine = window.matchMedia && window.matchMedia('(hover:hover) and (pointer:fine)').matches;
+    var fine = window.matchMedia('(hover:hover) and (pointer:fine)').matches;
     var peek = null, peekImg = null, hoverTimer = null;
     if (fine) {
       peek = document.createElement('div');
