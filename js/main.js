@@ -100,48 +100,86 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
-  // ===== 画像拡大（PC:カーソルを合わせるとプレビュー／SP:タップで横向き全画面） =====
+  // ===== 画像拡大（PC:ホバープレビュー／全画面ギャラリー・SP:タップで横画面） =====
   var zoomables = document.querySelectorAll('.zoomable');
   if (zoomables.length) {
+    // data-zoom-group ごとにギャラリーをまとめる（同じ組の画像は拡大したまま横スライドできる）
+    var groups = {};
+    Array.prototype.forEach.call(zoomables, function (img, i) {
+      var g = img.getAttribute('data-zoom-group') || ('single-' + i);
+      (groups[g] = groups[g] || []).push(img);
+    });
+
     var ov = document.createElement('div');
     ov.id = 'zoomOverlay';
     ov.setAttribute('role', 'dialog');
     ov.setAttribute('aria-modal', 'true');
     ov.innerHTML = '<div id="zoomStage">' +
-                     '<img alt="">' +
+                     '<div id="zoomTrack"></div>' +
+                     '<button id="zoomPrev" class="zoom-nav" type="button" aria-label="前へ">‹</button>' +
+                     '<button id="zoomNext" class="zoom-nav" type="button" aria-label="次へ">›</button>' +
                      '<button id="zoomClose" type="button" aria-label="閉じる">×</button>' +
                      '<p id="zoomCaption"></p>' +
                    '</div>';
     document.body.appendChild(ov);
-    var ovImg = ov.querySelector('img');
+    var track = ov.querySelector('#zoomTrack');
     var ovCap = ov.querySelector('#zoomCaption');
     var prevOverflow = '';
-    var currentAlt = '';
+    var items = [];      // 現在開いているグループの画像
+    var current = 0;
 
     // SPの縦持ちのときだけステージを90度回転させて「横画面」で見せる
     // （iOS Safari は screen.orientation.lock 非対応のため、CSS回転で実現）
     var mqSP = window.matchMedia('(max-width:767px), (pointer:coarse)');
     var mqPortrait = window.matchMedia('(orientation:portrait)');
-    var applyRotation = function () {
-      var rotate = mqSP.matches && mqPortrait.matches;
-      ov.classList.toggle('is-rotated', rotate);
-      ovCap.textContent = rotate
-        ? (currentAlt ? currentAlt + '／端末を横にするとそのまま見られます' : '端末を横にするとそのまま見られます')
-        : currentAlt;
+    var updateCaption = function () {
+      var alt = items[current] ? (items[current].alt || '') : '';
+      var nav = items.length > 1 ? ' （' + (current + 1) + '/' + items.length + '・横にスライドできます）' : '';
+      var tilt = ov.classList.contains('is-rotated') ? '／端末を横にするとそのまま見られます' : '';
+      ovCap.textContent = alt + nav + tilt;
     };
-    var onOrientationChange = function () { if (ov.classList.contains('is-open')) applyRotation(); };
-    if (mqPortrait.addEventListener) mqPortrait.addEventListener('change', onOrientationChange);
-    else if (mqPortrait.addListener) mqPortrait.addListener(onOrientationChange);
-    window.addEventListener('resize', onOrientationChange);
+    var applyRotation = function () {
+      ov.classList.toggle('is-rotated', mqSP.matches && mqPortrait.matches);
+      updateCaption();
+      // 回転で寸法が変わるため現在のスライドへ位置を取り直す
+      track.style.scrollBehavior = 'auto';
+      track.scrollLeft = current * track.clientWidth;
+      track.style.scrollBehavior = '';
+    };
+    var onViewportChange = function () { if (ov.classList.contains('is-open')) applyRotation(); };
+    if (mqPortrait.addEventListener) mqPortrait.addEventListener('change', onViewportChange);
+    else if (mqPortrait.addListener) mqPortrait.addListener(onViewportChange);
+    window.addEventListener('resize', onViewportChange);
+
+    var goTo = function (i, smooth) {
+      current = Math.max(0, Math.min(items.length - 1, i));
+      if (!smooth) track.style.scrollBehavior = 'auto';
+      track.scrollLeft = current * track.clientWidth;
+      if (!smooth) track.style.scrollBehavior = '';
+      updateCaption();
+    };
 
     var openZoom = function (img) {
-      ovImg.src = img.currentSrc || img.src;
-      ovImg.alt = img.alt || '';
-      currentAlt = img.alt || '';
-      applyRotation();
+      var g = img.getAttribute('data-zoom-group') || null;
+      items = g ? groups[g] : [img];
+      var start = Math.max(0, Array.prototype.indexOf.call(items, img));
+      track.innerHTML = '';
+      items.forEach(function (it) {
+        var slide = document.createElement('div');
+        slide.className = 'zoom-slide';
+        var im = document.createElement('img');
+        im.src = it.currentSrc || it.src;
+        im.alt = it.alt || '';
+        slide.appendChild(im);
+        track.appendChild(slide);
+      });
+      ov.classList.toggle('is-single', items.length < 2);
       ov.classList.add('is-open');
       prevOverflow = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
+      current = start;
+      applyRotation();
+      goTo(start, false);
       requestAnimationFrame(function () { ov.classList.add('is-visible'); });
     };
     var closeZoom = function () {
@@ -150,12 +188,35 @@ document.addEventListener('DOMContentLoaded', function () {
       setTimeout(function () {
         ov.classList.remove('is-open');
         ov.classList.remove('is-rotated');
-        ovImg.removeAttribute('src');
+        track.innerHTML = '';
       }, 200);
     };
-    ov.addEventListener('click', closeZoom);
+
+    ov.querySelector('#zoomClose').addEventListener('click', closeZoom);
+    ov.querySelector('#zoomPrev').addEventListener('click', function () { goTo(current - 1, true); });
+    ov.querySelector('#zoomNext').addEventListener('click', function () { goTo(current + 1, true); });
+    // 背景（画像やボタン以外）をクリックしたときだけ閉じる
+    ov.addEventListener('click', function (e) {
+      if (e.target === ov || e.target.id === 'zoomStage' ||
+          (e.target.classList && e.target.classList.contains('zoom-slide'))) closeZoom();
+    });
+    // スワイプ／ホイールでの移動を現在位置に反映
+    var scrollTimer = null;
+    track.addEventListener('scroll', function () {
+      if (scrollTimer) clearTimeout(scrollTimer);
+      scrollTimer = setTimeout(function () {
+        var w = track.clientWidth;
+        if (!w) return;
+        var i = Math.round(track.scrollLeft / w);
+        if (i !== current) { current = i; updateCaption(); }
+      }, 90);
+    }, { passive: true });
+
     document.addEventListener('keydown', function (e) {
-      if ((e.key === 'Escape' || e.key === 'Esc') && ov.classList.contains('is-open')) closeZoom();
+      if (!ov.classList.contains('is-open')) return;
+      if (e.key === 'Escape' || e.key === 'Esc') closeZoom();
+      else if (e.key === 'ArrowLeft') { e.preventDefault(); goTo(current - 1, true); }
+      else if (e.key === 'ArrowRight') { e.preventDefault(); goTo(current + 1, true); }
     });
 
     // PCのホバープレビュー（マウス操作の端末のみ）
@@ -164,7 +225,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (fine) {
       peek = document.createElement('div');
       peek.id = 'zoomPeek';
-      peek.innerHTML = '<img alt=""><p>クリックすると全画面で表示できます</p>';
+      peek.innerHTML = '<img alt=""><p>クリックすると全画面で開き、横にスライドできます</p>';
       document.body.appendChild(peek);
       peekImg = peek.querySelector('img');
     }

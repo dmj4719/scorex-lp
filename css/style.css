@@ -32,63 +32,96 @@ select.form-select{
 }
 select.form-select:invalid{color:#8A97B0;}
 
-/* ===== 画像拡大（PC:ホバープレビュー／SP:タップで横向き全画面） ===== */
+/* ===== 画像拡大（PC:ホバープレビュー／全画面ギャラリー・SP:タップで横画面） ===== */
 .zoomable{cursor:zoom-in;}
 @media (hover:hover) and (pointer:fine){
   .zoomable:hover{box-shadow:0 0 0 2.5px #1D5FD2;}
 }
-/* ホバー時の拡大プレビュー（PCのみ・クリック透過） */
+
+/* ホバー時のクイックプレビュー（PCのみ・クリック透過）
+   パネルを固定サイズにして、画像の元寸法が違っても拡大時の大きさを揃える */
 #zoomPeek{
   position:fixed;top:50%;left:50%;z-index:900;
+  width:min(92vw,980px);height:min(74vh,560px);
+  box-sizing:border-box;display:flex;flex-direction:column;
   transform:translate(-50%,-50%) scale(0.97);
   opacity:0;visibility:hidden;pointer-events:none;
   transition:opacity .16s ease,transform .16s ease,visibility .16s;
-  padding:10px;border-radius:14px;background:rgba(255,255,255,0.97);
+  padding:12px;border-radius:14px;background:rgba(255,255,255,0.97);
   box-shadow:0 26px 70px rgba(4,18,50,0.45);
-  max-width:min(94vw,1100px);
 }
 #zoomPeek.is-visible{opacity:1;visibility:visible;transform:translate(-50%,-50%) scale(1);}
-#zoomPeek img{display:block;max-width:100%;max-height:76vh;width:auto;height:auto;border-radius:8px;}
-#zoomPeek p{margin:8px 0 2px;text-align:center;font-size:12px;font-weight:700;color:#123A7B;}
+#zoomPeek img{flex:1 1 auto;min-height:0;width:100%;height:100%;object-fit:contain;display:block;border-radius:8px;}
+#zoomPeek p{flex:0 0 auto;margin:10px 0 2px;text-align:center;font-size:12px;font-weight:700;color:#123A7B;}
 
-/* 全画面ライトボックス */
+/* 全画面ギャラリー */
 #zoomOverlay{
   position:fixed;inset:0;z-index:1000;display:none;
-  background:rgba(6,18,42,0.95);
-  opacity:0;transition:opacity .18s ease;
+  background:rgba(6,18,42,0.95);opacity:0;transition:opacity .18s ease;
 }
 #zoomOverlay.is-open{display:block;}
 #zoomOverlay.is-visible{opacity:1;}
 /* 表示ステージ（SPの縦持ち時はこれごと90度回転させる） */
-#zoomStage{
-  position:absolute;left:0;top:0;width:100%;height:100%;
-  display:flex;align-items:center;justify-content:center;
-  padding:14px;box-sizing:border-box;
-}
+#zoomStage{position:absolute;left:0;top:0;width:100%;height:100%;}
 #zoomOverlay.is-rotated #zoomStage{
   width:100vh;height:100vw;          /* 古いブラウザ向けフォールバック */
   width:100dvh;height:100dvw;        /* アドレスバー分を除いた実寸 */
   transform:rotate(90deg) translateY(-100%);
   transform-origin:top left;
 }
-#zoomOverlay img{
-  max-width:100%;max-height:100%;width:auto;height:auto;
-  object-fit:contain;border-radius:8px;background:#fff;
-  box-shadow:0 24px 70px rgba(0,0,0,0.55);
-  transform:scale(0.97);transition:transform .18s ease;
+/* 横スライド用トラック */
+#zoomTrack{
+  position:absolute;inset:0;display:flex;
+  overflow-x:auto;overflow-y:hidden;
+  scroll-snap-type:x mandatory;scroll-behavior:smooth;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;-ms-overflow-style:none;
 }
-#zoomOverlay.is-visible img{transform:scale(1);}
-#zoomClose{
-  position:absolute;top:10px;right:10px;width:46px;height:46px;
-  border:none;border-radius:50%;background:rgba(255,255,255,0.95);color:#0B2D66;
-  font-size:24px;font-weight:900;line-height:1;cursor:pointer;
+#zoomTrack::-webkit-scrollbar{display:none;}
+.zoom-slide{
+  flex:0 0 100%;width:100%;height:100%;box-sizing:border-box;
+  scroll-snap-align:center;scroll-snap-stop:always;
   display:flex;align-items:center;justify-content:center;
-  box-shadow:0 6px 18px rgba(0,0,0,0.3);
+  padding:54px 58px 46px;
+}
+/* 画像はスライド枠いっぱいに収める＝どの画像でも拡大サイズが揃う */
+.zoom-slide img{
+  width:100%;height:100%;object-fit:contain;display:block;
+  border-radius:8px;filter:drop-shadow(0 18px 50px rgba(0,0,0,0.5));
+}
+/* 前後ボタン */
+.zoom-nav{
+  position:absolute;top:50%;transform:translateY(-50%);
+  width:46px;height:46px;border:none;border-radius:50%;
+  background:rgba(255,255,255,0.92);color:#0B2D66;
+  font-size:26px;font-weight:900;line-height:1;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 6px 18px rgba(0,0,0,0.35);
+}
+.zoom-nav:hover{background:#fff;}
+#zoomPrev{left:8px;}
+#zoomNext{right:8px;}
+#zoomOverlay.is-single .zoom-nav{display:none;}
+#zoomClose{
+  position:absolute;top:10px;right:10px;width:44px;height:44px;
+  border:none;border-radius:50%;background:rgba(255,255,255,0.95);color:#0B2D66;
+  font-size:23px;font-weight:900;line-height:1;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 6px 18px rgba(0,0,0,0.3);z-index:2;
 }
 #zoomCaption{
-  position:absolute;left:0;right:0;bottom:6px;margin:0;padding:0 16px;
+  position:absolute;left:0;right:0;bottom:8px;margin:0;padding:0 60px;
   text-align:center;font-size:12px;font-weight:700;color:rgba(255,255,255,0.85);
+  pointer-events:none;
+}
+/* SPは余白を詰めて画像を最大化 */
+@media (max-width:767px){
+  .zoom-slide{padding:38px 44px 34px;}
+  .zoom-nav{width:40px;height:40px;font-size:22px;}
+  #zoomPrev{left:4px;}
+  #zoomNext{right:4px;}
 }
 @media (prefers-reduced-motion:reduce){
-  #zoomPeek,#zoomOverlay,#zoomOverlay img{transition:none;}
+  #zoomPeek,#zoomOverlay{transition:none;}
+  #zoomTrack{scroll-behavior:auto;}
 }
