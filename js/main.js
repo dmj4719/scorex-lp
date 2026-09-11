@@ -64,23 +64,111 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
-  // 追従CTA：FVを通過してから表示
+  // 追従CTA：FVを通過してから表示。フォームが見えている間は隠す（送信ボタンと重なるため）
   var fv = document.getElementById('fv');
+  var formSec = document.getElementById('form');
   var sticky = document.getElementById('stickyCta');
   if (fv && sticky) {
-    var toggle = function (show) {
+    var pastFv = false;
+    var inForm = false;
+    var apply = function () {
+      var show = pastFv && !inForm;
       sticky.style.opacity = show ? '1' : '0';
       sticky.style.visibility = show ? 'visible' : 'hidden';
       sticky.style.transform = show ? 'translateY(0)' : 'translateY(12px)';
     };
     if ('IntersectionObserver' in window) {
       new IntersectionObserver(function (entries) {
-        entries.forEach(function (e) { toggle(!e.isIntersecting); });
+        entries.forEach(function (e) { pastFv = !e.isIntersecting; });
+        apply();
       }, { threshold: 0 }).observe(fv);
+      if (formSec) {
+        new IntersectionObserver(function (entries) {
+          entries.forEach(function (e) { inForm = e.isIntersecting; });
+          apply();
+        }, { threshold: 0 }).observe(formSec);
+      }
     } else {
       window.addEventListener('scroll', function () {
-        toggle(window.scrollY > fv.offsetHeight);
+        pastFv = window.scrollY > fv.offsetHeight;
+        if (formSec) {
+          var r = formSec.getBoundingClientRect();
+          inForm = r.top < window.innerHeight && r.bottom > 0;
+        }
+        apply();
       }, { passive: true });
     }
+  }
+
+  // ===== 画像拡大（PC:カーソルを合わせるとプレビュー／スマホ:タップで全画面） =====
+  var zoomables = document.querySelectorAll('.zoomable');
+  if (zoomables.length) {
+    // 全画面ライトボックス
+    var ov = document.createElement('div');
+    ov.id = 'zoomOverlay';
+    ov.setAttribute('role', 'dialog');
+    ov.setAttribute('aria-modal', 'true');
+    ov.innerHTML = '<button id="zoomClose" type="button" aria-label="閉じる">×</button>' +
+                   '<img alt=""><p id="zoomCaption"></p>';
+    document.body.appendChild(ov);
+    var ovImg = ov.querySelector('img');
+    var ovCap = ov.querySelector('#zoomCaption');
+    var prevOverflow = '';
+
+    var openZoom = function (img) {
+      ovImg.src = img.currentSrc || img.src;
+      ovImg.alt = img.alt || '';
+      ovCap.textContent = img.alt || '';
+      ov.classList.add('is-open');
+      prevOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      requestAnimationFrame(function () { ov.classList.add('is-visible'); });
+    };
+    var closeZoom = function () {
+      ov.classList.remove('is-visible');
+      document.body.style.overflow = prevOverflow;
+      setTimeout(function () { ov.classList.remove('is-open'); ovImg.removeAttribute('src'); }, 200);
+    };
+    ov.addEventListener('click', closeZoom);
+    document.addEventListener('keydown', function (e) {
+      if ((e.key === 'Escape' || e.key === 'Esc') && ov.classList.contains('is-open')) closeZoom();
+    });
+
+    // PCのホバープレビュー（マウス操作の端末のみ）
+    var fine = window.matchMedia && window.matchMedia('(hover:hover) and (pointer:fine)').matches;
+    var peek = null, peekImg = null, hoverTimer = null;
+    if (fine) {
+      peek = document.createElement('div');
+      peek.id = 'zoomPeek';
+      peek.innerHTML = '<img alt=""><p>クリックすると全画面で表示できます</p>';
+      document.body.appendChild(peek);
+      peekImg = peek.querySelector('img');
+    }
+    var hidePeek = function () {
+      if (hoverTimer) { clearTimeout(hoverTimer); hoverTimer = null; }
+      if (peek) peek.classList.remove('is-visible');
+    };
+
+    Array.prototype.forEach.call(zoomables, function (img) {
+      img.setAttribute('tabindex', '0');
+      img.setAttribute('role', 'button');
+      img.addEventListener('click', function () { hidePeek(); openZoom(img); });
+      img.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openZoom(img); }
+      });
+      if (fine) {
+        img.addEventListener('mouseenter', function () {
+          if (ov.classList.contains('is-open')) return;
+          if (hoverTimer) clearTimeout(hoverTimer);
+          hoverTimer = setTimeout(function () {
+            peekImg.src = img.currentSrc || img.src;
+            peekImg.alt = img.alt || '';
+            peek.classList.add('is-visible');
+          }, 180);
+        });
+        img.addEventListener('mouseleave', hidePeek);
+      }
+    });
+    if (fine) window.addEventListener('scroll', hidePeek, { passive: true });
   }
 });
