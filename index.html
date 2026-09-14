@@ -13,7 +13,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <title>SCORE X｜決裁者の課題から商談獲得できる営業支援プラットフォーム</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=20260914a">
+<link rel="stylesheet" href="css/style.css?v=20260914b">
 </head>
 <body>
 <!-- Google Tag Manager (noscript) -->
@@ -62,24 +62,25 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <h1 style="margin:0 0 16px;font-size:31px;font-weight:900;line-height:1.42;letter-spacing:0.01em;text-wrap:pretty">決裁者の課題から、<br>案件を<span style="color:#FFD24A">直接選べます</span>。</h1>
       <p style="margin:0 0 22px;font-size:14.5px;line-height:1.95;font-weight:600;color:rgba(255,255,255,0.96)">課題を持つ企業と提案したい企業をつなぐ<br><strong style="color:#FFD24A;font-weight:900">月額6万円〜</strong>の営業支援プラットフォーム。</p>
       <!-- 案件デモスライド -->
-      <div style="border-radius:12px;overflow:hidden;background:#0C1C33;border:1px solid rgba(255,255,255,0.22);box-shadow:0 10px 26px rgba(4,18,50,0.40);margin:0 -8px 20px">
+      <div class="board-ui" style="border-radius:12px;overflow:hidden;background:#0C1C33;border:1px solid rgba(255,255,255,0.22);box-shadow:0 10px 26px rgba(4,18,50,0.40);margin:0 -8px 20px">
         <div style="background:#152C4B;padding:9px 10px 0">
           <div style="display:flex;align-items:center;gap:7px;margin-bottom:8px">
             <img src="img/img-logo-black.png" alt="SCORE X" style="height:11px;display:block;filter:invert(1);flex-shrink:0">
             <span style="font-size:11px;font-weight:900;color:#fff;white-space:nowrap">&quot;課題&quot;を解決</span>
             <span style="margin-left:auto;display:flex;align-items:center;gap:4px;font-size:9px;font-weight:700;color:rgba(255,255,255,0.72);white-space:nowrap"><span style="width:5px;height:5px;border-radius:50%;background:#4ADE80;flex-shrink:0"></span>リアルタイム更新中</span>
           </div>
-          <div style="display:flex;gap:4px;overflow-x:auto;scrollbar-width:none">
-            <span style="font-size:9.5px;font-weight:800;color:#fff;background:#2A6CCB;padding:5px 10px;border-radius:5px 5px 0 0;white-space:nowrap;flex-shrink:0">プレミアム案件</span>
-            <span style="font-size:9.5px;font-weight:700;color:rgba(255,255,255,0.58);background:rgba(255,255,255,0.09);padding:5px 10px;border-radius:5px 5px 0 0;white-space:nowrap;flex-shrink:0">課題一覧</span>
-            <span style="font-size:9.5px;font-weight:700;color:rgba(255,255,255,0.58);background:rgba(255,255,255,0.09);padding:5px 10px;border-radius:5px 5px 0 0;white-space:nowrap;flex-shrink:0">パートナー案件</span>
+          <div style="display:flex;gap:4px;align-items:flex-end">
+            <button type="button" class="board-tab is-active" data-cat="premium">プレミアム案件</button>
+            <button type="button" class="board-tab" data-cat="all">課題一覧</button>
+            <button type="button" class="board-tab" data-cat="partner">パートナー案件</button>
+            <span class="board-count">2件を表示中</span>
           </div>
         </div>
-        <div style="display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding:10px;-webkit-overflow-scrolling:touch;scrollbar-width:none">
-          <img src="img/img-board-sns.png" alt="SNS運用代行の募集案件" style="flex:0 0 100%;width:100%;height:auto;border-radius:10px;display:block;scroll-snap-align:center">
-          <img src="img/img-board-recruit.png" alt="採用プラットフォーム開発の募集案件" style="flex:0 0 100%;width:100%;height:auto;border-radius:10px;display:block;scroll-snap-align:center">
-          <img src="img/img-board-ec.png" alt="ECコンサルタント・代行会社の募集案件" style="flex:0 0 100%;width:100%;height:auto;border-radius:10px;display:block;scroll-snap-align:center">
-          <img src="img/img-board-sns-influencer.png" alt="ママ向けインフルエンサーマーケ会社の募集案件" style="flex:0 0 100%;width:100%;height:auto;border-radius:10px;display:block;scroll-snap-align:center">
+        <div class="board-track" style="display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding:10px;-webkit-overflow-scrolling:touch;scrollbar-width:none">
+          <img src="img/img-board-sns-influencer.png" data-cat="all" alt="ママ向けインフルエンサーマーケ会社の募集案件" style="flex:0 0 100%;width:100%;height:auto;border-radius:10px;display:block;scroll-snap-align:center">
+          <img src="img/img-board-recruit.png" data-cat="premium all" alt="採用プラットフォーム開発の募集案件" style="flex:0 0 100%;width:100%;height:auto;border-radius:10px;display:block;scroll-snap-align:center">
+          <img src="img/img-board-sns.png" data-cat="premium partner all" alt="SNS運用代行の募集案件" style="flex:0 0 100%;width:100%;height:auto;border-radius:10px;display:block;scroll-snap-align:center">
+          <img src="img/img-board-ec.png" data-cat="partner all" alt="ECコンサルタント・代行会社の募集案件" style="flex:0 0 100%;width:100%;height:auto;border-radius:10px;display:block;scroll-snap-align:center">
         </div>
         <p style="margin:0;padding:0 10px 10px;text-align:center;font-size:11px;font-weight:700;color:rgba(255,255,255,0.8)">← 横にスワイプして他の案件を見る →</p>
       </div>
@@ -207,24 +208,25 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
       </div>
       <p style="margin:0 0 10px;text-align:center;font-size:14px;font-weight:900;line-height:1.6;color:#fff;text-wrap:pretty">では、<span style="color:#FFD24A">どんな商談</span>が受けられる？</p>
-      <div style="border-radius:12px;overflow:hidden;background:#0C1C33;border:1px solid rgba(255,255,255,0.22);box-shadow:0 10px 26px rgba(4,18,50,0.40);margin:0 -8px 16px">
+      <div class="board-ui" style="border-radius:12px;overflow:hidden;background:#0C1C33;border:1px solid rgba(255,255,255,0.22);box-shadow:0 10px 26px rgba(4,18,50,0.40);margin:0 -8px 16px">
         <div style="background:#152C4B;padding:9px 10px 0">
           <div style="display:flex;align-items:center;gap:7px;margin-bottom:8px">
             <img src="img/img-logo-black.png" alt="SCORE X" style="height:11px;display:block;filter:invert(1);flex-shrink:0">
             <span style="font-size:11px;font-weight:900;color:#fff;white-space:nowrap">&quot;課題&quot;を解決</span>
             <span style="margin-left:auto;display:flex;align-items:center;gap:4px;font-size:9px;font-weight:700;color:rgba(255,255,255,0.72);white-space:nowrap"><span style="width:5px;height:5px;border-radius:50%;background:#4ADE80;flex-shrink:0"></span>リアルタイム更新中</span>
           </div>
-          <div style="display:flex;gap:4px;overflow-x:auto;scrollbar-width:none">
-            <span style="font-size:9.5px;font-weight:800;color:#fff;background:#2A6CCB;padding:5px 10px;border-radius:5px 5px 0 0;white-space:nowrap;flex-shrink:0">プレミアム案件</span>
-            <span style="font-size:9.5px;font-weight:700;color:rgba(255,255,255,0.58);background:rgba(255,255,255,0.09);padding:5px 10px;border-radius:5px 5px 0 0;white-space:nowrap;flex-shrink:0">課題一覧</span>
-            <span style="font-size:9.5px;font-weight:700;color:rgba(255,255,255,0.58);background:rgba(255,255,255,0.09);padding:5px 10px;border-radius:5px 5px 0 0;white-space:nowrap;flex-shrink:0">パートナー案件</span>
+          <div style="display:flex;gap:4px;align-items:flex-end">
+            <button type="button" class="board-tab is-active" data-cat="premium">プレミアム案件</button>
+            <button type="button" class="board-tab" data-cat="all">課題一覧</button>
+            <button type="button" class="board-tab" data-cat="partner">パートナー案件</button>
+            <span class="board-count">2件を表示中</span>
           </div>
         </div>
-        <div style="display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding:10px;-webkit-overflow-scrolling:touch;scrollbar-width:none">
-          <img src="img/img-board-sns.png" alt="SNS運用代行の募集案件" style="flex:0 0 100%;width:100%;height:auto;border-radius:10px;display:block;scroll-snap-align:center">
-          <img src="img/img-board-recruit.png" alt="採用プラットフォーム開発の募集案件" style="flex:0 0 100%;width:100%;height:auto;border-radius:10px;display:block;scroll-snap-align:center">
-          <img src="img/img-board-ec.png" alt="ECコンサルタント・代行会社の募集案件" style="flex:0 0 100%;width:100%;height:auto;border-radius:10px;display:block;scroll-snap-align:center">
-          <img src="img/img-board-sns-influencer.png" alt="ママ向けインフルエンサーマーケ会社の募集案件" style="flex:0 0 100%;width:100%;height:auto;border-radius:10px;display:block;scroll-snap-align:center">
+        <div class="board-track" style="display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding:10px;-webkit-overflow-scrolling:touch;scrollbar-width:none">
+          <img src="img/img-board-sns-influencer.png" data-cat="all" alt="ママ向けインフルエンサーマーケ会社の募集案件" style="flex:0 0 100%;width:100%;height:auto;border-radius:10px;display:block;scroll-snap-align:center">
+          <img src="img/img-board-recruit.png" data-cat="premium all" alt="採用プラットフォーム開発の募集案件" style="flex:0 0 100%;width:100%;height:auto;border-radius:10px;display:block;scroll-snap-align:center">
+          <img src="img/img-board-sns.png" data-cat="premium partner all" alt="SNS運用代行の募集案件" style="flex:0 0 100%;width:100%;height:auto;border-radius:10px;display:block;scroll-snap-align:center">
+          <img src="img/img-board-ec.png" data-cat="partner all" alt="ECコンサルタント・代行会社の募集案件" style="flex:0 0 100%;width:100%;height:auto;border-radius:10px;display:block;scroll-snap-align:center">
         </div>
         <p style="margin:0;padding:0 10px 10px;text-align:center;font-size:11px;font-weight:700;color:rgba(255,255,255,0.8)">← 横にスワイプして他の案件を見る →</p>
       </div>
@@ -687,7 +689,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
     </div>
 </div>
-<script src="js/main.js?v=20260914a"></script>
+<script src="js/main.js?v=20260914b"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>
 (function () {

@@ -125,3 +125,20 @@ select.form-select:invalid{color:#8A97B0;}
   #zoomPeek,#zoomOverlay{transition:none;}
   #zoomTrack{scroll-behavior:auto;}
 }
+
+/* ===== 案件掲示板UI（FV／SCORE Xセクション）のタブ ===== */
+.board-tab{
+  font-family:inherit;font-size:9.5px;font-weight:700;line-height:1.4;
+  color:rgba(255,255,255,0.58);background:rgba(255,255,255,0.09);
+  border:0;padding:5px 10px;border-radius:5px 5px 0 0;
+  white-space:nowrap;flex-shrink:0;cursor:pointer;
+  -webkit-appearance:none;appearance:none;
+  transition:background .18s ease,color .18s ease;
+}
+.board-tab:hover{background:rgba(255,255,255,0.18);color:rgba(255,255,255,0.85);}
+.board-tab.is-active,.board-tab.is-active:hover{background:#2A6CCB;color:#fff;font-weight:800;}
+.board-count{
+  margin-left:auto;padding-bottom:5px;font-size:9px;font-weight:700;
+  color:rgba(255,255,255,0.6);white-space:nowrap;flex-shrink:0;
+}
+.board-ui img.is-hidden{display:none !important;}

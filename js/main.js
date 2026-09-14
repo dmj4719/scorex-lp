@@ -257,3 +257,39 @@ document.addEventListener('DOMContentLoaded', function () {
     if (fine) window.addEventListener('scroll', hidePeek, { passive: true });
   }
 });
+
+// ===== 案件掲示板UIのタブ切り替え（プレミアム案件／課題一覧／パートナー案件） =====
+document.addEventListener('DOMContentLoaded', function () {
+  Array.prototype.forEach.call(document.querySelectorAll('.board-ui'), function (ui) {
+    var tabs  = ui.querySelectorAll('.board-tab');
+    var track = ui.querySelector('.board-track');
+    var count = ui.querySelector('.board-count');
+    if (!tabs.length || !track) return;
+    var slides = track.querySelectorAll('img');
+    if (!slides.length) return;
+
+    // 選んだタブに属する案件だけを残し、先頭までスクロールを戻す
+    var show = function (cat) {
+      var shown = 0;
+      Array.prototype.forEach.call(slides, function (img) {
+        var hit = (img.getAttribute('data-cat') || '').split(' ').indexOf(cat) !== -1;
+        img.classList.toggle('is-hidden', !hit);
+        if (hit) shown++;
+      });
+      if (count) count.textContent = shown + '件を表示中';
+      track.style.scrollBehavior = 'auto';
+      track.scrollLeft = 0;
+      track.style.scrollBehavior = '';
+    };
+
+    Array.prototype.forEach.call(tabs, function (tab) {
+      tab.addEventListener('click', function () {
+        Array.prototype.forEach.call(tabs, function (t) { t.classList.remove('is-active'); });
+        tab.classList.add('is-active');
+        show(tab.getAttribute('data-cat'));
+      });
+    });
+
+    show((ui.querySelector('.board-tab.is-active') || tabs[0]).getAttribute('data-cat'));
+  });
+});
