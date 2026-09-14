@@ -142,3 +142,12 @@ select.form-select:invalid{color:#8A97B0;}
   color:rgba(255,255,255,0.6);white-space:nowrap;flex-shrink:0;
 }
 .board-ui img.is-hidden{display:none !important;}
+
+/* 掲示板UIの「リアルタイム稼働中」を示す緑丸（ゆっくり脈打つ） */
+.board-live{animation:boardLive 2s ease-out infinite;}
+@keyframes boardLive{
+  0%{box-shadow:0 0 0 0 rgba(74,222,128,0.55);opacity:1;}
+  70%{box-shadow:0 0 0 7px rgba(74,222,128,0);opacity:.75;}
+  100%{box-shadow:0 0 0 0 rgba(74,222,128,0);opacity:1;}
+}
+@media (prefers-reduced-motion:reduce){.board-live{animation:none;}}
